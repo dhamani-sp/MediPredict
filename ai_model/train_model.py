@@ -119,9 +119,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--data',
-        default='data/medquad.csv',
-        help='Path to CSV with question/answer columns'
+    '--data',
+    default='data/medquad_combined.csv',
+    help='Path to CSV with question/answer columns'
     )
 
     parser.add_argument(
