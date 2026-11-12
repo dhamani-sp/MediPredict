@@ -18,14 +18,12 @@ Pick one (both are free and don't need special permission for student/academic u
 - **AI Medical Chatbot dataset** (Hugging Face, simpler flat CSV):
   https://huggingface.co/datasets/ruslanmv/ai-medical-chatbot
 
-Save whichever one you pick as `ai-model/data/medquad.csv` with at least
-two columns containing the question text and the answer text (the training
-script auto-detects columns with "question"/"answer" in the name).
+The project uses the combined dataset saved as `ai_model/data/medquad_combined.csv`. This dataset combines the original MedQuAD questions with the enhanced dataset while removing duplicate questions. Keep the original CSV files for reference. The training script expects columns containing question and answer text.
 
 ## 2. Install dependencies (no GPU needed)
 
 ```bash
-cd ai-model
+cd ai_model
 python -m venv venv
 venv\Scripts\activate        # Windows
 # source venv/bin/activate   # macOS/Linux
@@ -35,7 +33,7 @@ pip install -r requirements.txt
 ## 3. Train the model
 
 ```bash
-python train_model.py --data data/medquad.csv
+python train_model.py --data data/medquad_combined.csv --out model
 ```
 
 This creates a `model/` folder with the saved TF-IDF vectorizer and the
@@ -51,9 +49,7 @@ python app.py
 Starts on `http://localhost:8000`. Test it:
 
 ```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d "{\"message\": \"what are the symptoms of diabetes\"}"
+Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method Post -ContentType "application/json" -Body '{"message":"what are the symptoms of diabetes"}'
 ```
 
 ## 5. Connect it to your Node backend
