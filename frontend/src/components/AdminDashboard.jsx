@@ -192,11 +192,12 @@ export default function AdminDashboard() {
   // ---------------------------------------------------------------------------
 
   function handleLogout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('admin_user')
+  localStorage.removeItem('token')
+  localStorage.removeItem('admin_user')
+  localStorage.removeItem('mp_session')
 
-    window.location.href = '/admin-login'
-  }
+  window.location.href = '/'
+}
 
   const verifiedCount = doctors.filter(
     doctor => doctor.verified

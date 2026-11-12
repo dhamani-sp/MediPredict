@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Stethoscope, GraduationCap, Building2, MapPin, ChevronRight, CheckCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { DoctorProfiles } from '../../utils/db.js'
-
+import { api } from '../../config/api.js'
 const SPECIALIZATIONS = [
   'Cardiologist', 'Endocrinologist', 'Pulmonologist', 'General Practitioner',
   'Internal Medicine', 'Neurologist', 'Oncologist', 'Orthopedic Surgeon',
@@ -51,6 +50,7 @@ export default function DoctorOnboarding({ onComplete }) {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [done, setDone]       = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -69,30 +69,43 @@ export default function DoctorOnboarding({ onComplete }) {
     return e
   }
 
-  function handleSubmit(e) {
-    e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length) { setErrors(errs); return }
+  async function handleSubmit(e) {
+  e.preventDefault()
 
-    setLoading(true)
-    setTimeout(() => {
-      const profile = DoctorProfiles.create({
-        user_id:          user.id,
-        full_name:        form.full_name.trim(),
-        degree:           form.degree.trim(),
-        university:       form.university.trim(),
-        year_of_passing:  +form.year_of_passing,
-        highest_degree:   form.highest_degree.trim(),
-        hospital:         form.hospital.trim(),
-        specialization:   form.specialization,
-        city:             form.city.trim(),
-        verified:         false,
-      })
-      setLoading(false)
-      setDone(true)
-      setTimeout(() => onComplete(profile), 1600)
-    }, 800)
+  const errs = validate()
+  if (Object.keys(errs).length) {
+    setErrors(errs)
+    return
   }
+
+  setLoading(true)
+  setSubmitError('')
+
+  try {
+    const response = await api.post('/api/doctors/onboard', {
+      full_name: form.full_name.trim(),
+      degree: form.degree.trim(),
+      university: form.university.trim(),
+      year_of_passing: Number(form.year_of_passing),
+      highest_degree: form.highest_degree.trim(),
+      hospital: form.hospital.trim(),
+      specialization: form.specialization,
+      city: form.city.trim(),
+    })
+
+    const profile = response.profile
+
+    setDone(true)
+    setTimeout(() => onComplete(profile), 1600)
+
+  } catch (error) {
+    console.error('Doctor onboarding failed:', error)
+    setSubmitError(error.message || 'Unable to submit your profile. Please try again.')
+  } finally {
+    setLoading(false)
+  }
+}
+
 
   if (done) {
     return (
@@ -139,6 +152,11 @@ export default function DoctorOnboarding({ onComplete }) {
           Patients can still send consultation requests while verification is pending.
         </span>
       </div>
+      {submitError && (
+  <div className="alert alert-error" style={{ marginBottom: 20 }}>
+    {submitError}
+  </div>
+)}
 
       <form onSubmit={handleSubmit}>
         {/* Personal */}
